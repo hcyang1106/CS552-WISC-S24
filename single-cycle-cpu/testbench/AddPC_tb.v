@@ -1,8 +1,8 @@
-module AdderPC_tb;
+module AddPC_tb;
     reg [15:0] in;
     wire [15:0] out;
 
-    AdderPC uut(.in(in), .out(out));
+    AddPC uut(.in(in), .out(out));
 
     initial begin
         repeat (10) begin
