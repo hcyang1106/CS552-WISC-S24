@@ -5,3 +5,6 @@ Single Cycle CPU (The diagram is from the book, still need to be modified)
 
 Implementation 1
 ![Implementation 1](./images/cpu_single_cycle_draft.png)
+
+Implementation 2
+![Implementation 2](./images/CS552_project_phase1.drawio.png)
