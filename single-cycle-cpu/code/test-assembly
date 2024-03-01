@@ -1,0 +1,23 @@
+    LW 	R3, R1, 1 
+    LW 	R4, R2, 2 
+    ADD	R5, R3, R4
+    SUB R6, R4, R3
+    XOR R7, R5, R4
+    SW  R5, R1, 0
+    SW  R6, R1, 2
+    LW  R8, R1, 2
+    LW  R9, R1, 0
+    SLL R10, R9, 3
+    SW  R10, R1, 2
+    SLL R11, R9, 5
+    SW  R11, R1, 0
+    SRA R10, R9, 3
+    SRA R11, R9, 5
+    ROR R12, R9, 3
+    ROR R13, R9, 5
+    LLB R9, 0x77
+    LHB R5, 0x77
+    RED R14, R5, R9
+    RED R15, R3, R4
+
+
