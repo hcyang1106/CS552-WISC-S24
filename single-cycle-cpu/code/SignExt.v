@@ -1,8 +1,10 @@
 module SignExt(in, out);
 
-    input  [3:0] in;
+    parameter bit = 4;
+
+    input  [bit-1:0] in;
     output [15:0] out;
 
-    assign out = {{12{in[3]}}, in[3:0]};
+    assign out = {{(16-bit){in[bit-1]}}, in[bit-1:0]};
 
 endmodule
