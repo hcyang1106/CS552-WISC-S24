@@ -1,23 +1,3 @@
-// Gokul's D-flipflop
-
-module dff (q, d, wen, clk, rst);
-
-    output         q; //DFF output
-    input          d; //DFF input
-    input 	   wen; //Write Enable
-    input          clk; //Clock
-    input          rst; //Reset (used synchronously)
-
-    reg            state;
-
-    assign q = state;
-
-    always @(posedge clk) begin
-      state = rst ? 0 : (wen ? d : state);
-    end
-
-endmodule
-
 module ReadDecoder_4_16(input [3:0] RegId, output [15:0] Wordline);
 	assign Wordline[0] = ~RegId[3] & ~RegId[2] & ~RegId[1] & ~RegId[0];
 	assign Wordline[1] = ~RegId[3] & ~RegId[2] & ~RegId[1] & RegId[0];
@@ -66,10 +46,10 @@ module BitCell( input clk,  input rst, input D, input WriteEnable, input ReadEna
 	
 	wire q, out;
 	
-	assign out = WriteEnable ? D : q;
+	assign out = q; // WriteEnable ? D : q;
 	
-	bufif1 line1(Bitline1, out, ReadEnable1);
-	bufif1 line2(Bitline2, out, ReadEnable2);
+	assign Bitline1 = ReadEnable1 ? out : 1'bz;
+	assign Bitline2 = ReadEnable2 ? out : 1'bz;
 
 	dff iDFF(.q(q), .d(D), .wen(WriteEnable), .clk(clk), .rst(rst));
 
