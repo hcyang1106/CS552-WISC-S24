@@ -127,9 +127,23 @@ module Control(opcode, MemWrite, WriteRegSrc, RegWrite, BInv, ALUSrc, ALUOp, Shi
                 BrReg           <= 1'b0;
                 // ReadReg2Src don't care 
 			end
-            // 4'b0010: begin // PADDSB
-				
-			// end
+            4'b0111: begin // PADDSB
+				MemWrite		<= 1'b0;
+                WriteRegSrc     <= 2'b00;
+                RegWrite		<= 1'b1;
+                BInv            <= 1'b0;
+                ALUSrc          <= 2'b00;
+				ALUOp			<= 4'b0110;
+                ReadReg1Src     <= 1'b0;
+                ReadReg2Src     <= 1'b0;
+                Halt            <= 1'b0;
+                ENZ             <= 1'b0;
+                ENN             <= 1'b0;
+                ENV             <= 1'b0;
+                Br              <= 1'b0;
+                BrReg           <= 1'b0;
+                // ShiftImm don't care 
+			end
             4'b1010: begin // LLB
 				MemWrite		<= 1'b0;
                 WriteRegSrc     <= 2'b00;
