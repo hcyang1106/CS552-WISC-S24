@@ -36,7 +36,7 @@ module cpu (input clk, input rst_n, output hlt, output [15:0] pc);
 	// PC datapath
 	PC PCreg(.in(PC_next), .wen(PCWrite), .clk(clk), .rst(~rst_n), .out(PC_curr));
 	cla_16bit PC_increment(.A(PC_curr), .B(16'h0002), .Cin(1'b0), .S(PC_inc), .Cout(), .ovfl());
-	cla_16bit PC_branch_adder(.A(PC_inc), .B({6'h00, instru[8:0], 1'b0}), .Cin(1'b0), .S(PC_branch), .Cout(), .ovfl());
+	cla_16bit PC_branch_adder(.A(PC_inc), .B({{6{instru[8]}}, instru[8:0], 1'b0}), .Cin(1'b0), .S(PC_branch), .Cout(), .ovfl());
 	
 	assign pc = PC_curr;
 	
