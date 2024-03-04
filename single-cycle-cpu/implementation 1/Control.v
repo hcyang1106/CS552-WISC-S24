@@ -349,10 +349,10 @@ module branch_control(CCC, N, Z, V, out);
 		case (CCC)
 			3'b000: begin out = (Z == 1'b0); end
 			3'b001: begin out = (Z == 1'b1); end
-			3'b010: begin out = ((Z == 1'b0) && (N == 1'b0)); end
+			3'b010: begin out = ((Z == 1'b0) | (N == 1'b0)); end
 			3'b011: begin out = (N == 1'b1); end
-			3'b100: begin out = ((Z == 1'b1) || ((N == 1'b0) && (Z == 1'b0))); end
-			3'b101: begin out = ((N == 1'b1) || (Z == 1'b1)); end
+			3'b100: begin out = ((Z == 1'b1) | ((N == 1'b0) & (Z == 1'b0))); end
+			3'b101: begin out = ((N == 1'b1) | (Z == 1'b1)); end
 			3'b110: begin out = (V == 1'b1); end
 			3'b111: begin out = 1'b1; end
 			default: begin out = 1'bx; end
