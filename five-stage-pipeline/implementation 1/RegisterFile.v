@@ -46,7 +46,7 @@ module BitCell( input clk,  input rst, input D, input WriteEnable, input ReadEna
 	
 	wire q, out;
 	
-	assign out = q; // WriteEnable ? D : q;
+	assign out = WriteEnable ? D : q;
 	
 	assign Bitline1 = ReadEnable1 ? out : 1'bz;
 	assign Bitline2 = ReadEnable2 ? out : 1'bz;
