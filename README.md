@@ -7,4 +7,4 @@ Implementation 2
 ![Implementation 2](./images/Screen%20Shot%202024-03-02%20at%205.27.13%20PM.png)
 
 Pipelined 
-![Pipelined](./images/ScreCPU_pipeline.png)
+![Pipelined](./images/CPU_pipeline.png)
