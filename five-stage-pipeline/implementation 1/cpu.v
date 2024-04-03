@@ -61,6 +61,8 @@ module cpu (input clk, input rst_n, output hlt, output [15:0] pc);
 	// memory datapath
 	assign enable = MemtoReg | MemWrite;
 	memory1c DataMEM(.data_out(d_mem_out), .data_in(reg_data_2), .addr(ALU_out), .enable(enable), .wr(MemWrite), .clk(clk), .rst(~rst_n));
+	
+	// writeback datapath
 	assign reg_write_data = MemtoReg ? d_mem_out : exec_out;
 	
 endmodule 

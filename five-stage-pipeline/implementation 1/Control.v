@@ -209,7 +209,7 @@ module Control(opcode, CCC, N, Z, V, set_N, set_Z, set_V, PCWrite, RegSrc, RegWr
 				RegWrite = 1'b1;
 				ExtSrc = 1'bx;
 				ByteSel = 1'b0;
-				ALUSrc = 1'bx;
+				ALUSrc = 1'b0;
 				MemWrite = 1'b0;
 				LoadByte = 1'b1;
 				PCS = 1'b0;
@@ -228,7 +228,7 @@ module Control(opcode, CCC, N, Z, V, set_N, set_Z, set_V, PCWrite, RegSrc, RegWr
 				RegWrite = 1'b1;
 				ExtSrc = 1'bx;
 				ByteSel = 1'b1;
-				ALUSrc = 1'bx;
+				ALUSrc = 1'b0;
 				MemWrite = 1'b0;
 				LoadByte = 1'b1;
 				PCS = 1'b0;
@@ -247,7 +247,7 @@ module Control(opcode, CCC, N, Z, V, set_N, set_Z, set_V, PCWrite, RegSrc, RegWr
 				RegWrite = 1'b0;
 				ExtSrc = 1'bx;
 				ByteSel = 1'bx;
-				ALUSrc = 1'bx;
+				ALUSrc = 1'b0;
 				MemWrite = 1'b0;
 				LoadByte = 1'bx;
 				PCS = 1'bx;
@@ -266,7 +266,7 @@ module Control(opcode, CCC, N, Z, V, set_N, set_Z, set_V, PCWrite, RegSrc, RegWr
 				RegWrite = 1'b0;
 				ExtSrc = 1'bx;
 				ByteSel = 1'bx;
-				ALUSrc = 1'bx;
+				ALUSrc = 1'b0;
 				MemWrite = 1'b0;
 				LoadByte = 1'bx;
 				PCS = 1'bx;
@@ -285,7 +285,7 @@ module Control(opcode, CCC, N, Z, V, set_N, set_Z, set_V, PCWrite, RegSrc, RegWr
 				RegWrite = 1'b1;
 				ExtSrc = 1'bx;
 				ByteSel = 1'bx;
-				ALUSrc = 1'bx;
+				ALUSrc = 1'b0;
 				MemWrite = 1'b0;
 				LoadByte = 1'bx;
 				PCS = 1'b1;
