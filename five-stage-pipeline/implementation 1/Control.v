@@ -1,10 +1,10 @@
-module Control(opcode, CCC, N, Z, V, set_N, set_Z, set_V, PCWrite, RegSrc, RegWrite, ExtSrc, ByteSel, ALUSrc, MemWrite, LoadByte, PCS, MemtoReg, ALUop, BrReg, Branch);
+module Control(opcode, CCC, N, Z, V, set_N, set_Z, set_V, Halt, RegSrc, RegWrite, ExtSrc, ByteSel, ALUSrc, MemWrite, LoadByte, PCS, MemtoReg, ALUop, BrReg, Branch);
 	
 	input [3:0] opcode;
 	input [2:0] CCC;
 	input N, Z, V;
 	output reg set_N, set_Z, set_V;
-	output reg PCWrite, RegSrc, RegWrite, ExtSrc, ByteSel, ALUSrc, MemWrite, LoadByte, PCS, MemtoReg, BrReg, Branch;
+	output reg Halt, RegSrc, RegWrite, ExtSrc, ByteSel, ALUSrc, MemWrite, LoadByte, PCS, MemtoReg, BrReg, Branch;
 	output reg [2:0] ALUop;
 	
 	wire b_control;
@@ -14,7 +14,7 @@ module Control(opcode, CCC, N, Z, V, set_N, set_Z, set_V, PCWrite, RegSrc, RegWr
 	always @(*) begin
 		case (opcode)
 			4'b0000: begin // ADD
-				PCWrite = 1'b1;
+				Halt = 1'b0;
 				RegSrc = 1'b0;
 				RegWrite = 1'b1;
 				ExtSrc = 1'bx;
@@ -33,7 +33,7 @@ module Control(opcode, CCC, N, Z, V, set_N, set_Z, set_V, PCWrite, RegSrc, RegWr
 			end
 			
 			4'b0001: begin // SUB
-				PCWrite = 1'b1;
+				Halt = 1'b0;
 				RegSrc = 1'b0;
 				RegWrite = 1'b1;
 				ExtSrc = 1'bx;
@@ -52,7 +52,7 @@ module Control(opcode, CCC, N, Z, V, set_N, set_Z, set_V, PCWrite, RegSrc, RegWr
 			end
 			
 			4'b0010: begin // XOR
-				PCWrite = 1'b1;
+				Halt = 1'b0;
 				RegSrc = 1'b0;
 				RegWrite = 1'b1;
 				ExtSrc = 1'bx;
@@ -71,7 +71,7 @@ module Control(opcode, CCC, N, Z, V, set_N, set_Z, set_V, PCWrite, RegSrc, RegWr
 			end
 			
 			4'b0011: begin // RED
-				PCWrite = 1'b1;
+				Halt = 1'b0;
 				RegSrc = 1'b0;
 				RegWrite = 1'b1;
 				ExtSrc = 1'bx;
@@ -90,7 +90,7 @@ module Control(opcode, CCC, N, Z, V, set_N, set_Z, set_V, PCWrite, RegSrc, RegWr
 			end
 			
 			4'b0100: begin // SLL
-				PCWrite = 1'b1;
+				Halt = 1'b0;
 				RegSrc = 1'bx;
 				RegWrite = 1'b1;
 				ExtSrc = 1'b0;
@@ -109,7 +109,7 @@ module Control(opcode, CCC, N, Z, V, set_N, set_Z, set_V, PCWrite, RegSrc, RegWr
 			end
 			
 			4'b0101: begin // SRA
-				PCWrite = 1'b1;
+				Halt = 1'b0;
 				RegSrc = 1'bx;
 				RegWrite = 1'b1;
 				ExtSrc = 1'b0;
@@ -128,7 +128,7 @@ module Control(opcode, CCC, N, Z, V, set_N, set_Z, set_V, PCWrite, RegSrc, RegWr
 			end
 			
 			4'b0110: begin // ROR
-				PCWrite = 1'b1;
+				Halt = 1'b0;
 				RegSrc = 1'bx;
 				RegWrite = 1'b1;
 				ExtSrc = 1'b0;
@@ -147,7 +147,7 @@ module Control(opcode, CCC, N, Z, V, set_N, set_Z, set_V, PCWrite, RegSrc, RegWr
 			end
 			
 			4'b0111: begin // PADDSB
-				PCWrite = 1'b1;
+				Halt = 1'b0;
 				RegSrc = 1'b0;
 				RegWrite = 1'b1;
 				ExtSrc = 1'bx;
@@ -166,7 +166,7 @@ module Control(opcode, CCC, N, Z, V, set_N, set_Z, set_V, PCWrite, RegSrc, RegWr
 			end
 			
 			4'b1000: begin // LW
-				PCWrite = 1'b1;
+				Halt = 1'b0;
 				RegSrc = 1'bx;
 				RegWrite = 1'b1;
 				ExtSrc = 1'b1;
@@ -185,7 +185,7 @@ module Control(opcode, CCC, N, Z, V, set_N, set_Z, set_V, PCWrite, RegSrc, RegWr
 			end
 			
 			4'b1001: begin // SW
-				PCWrite = 1'b1;
+				Halt = 1'b0;
 				RegSrc = 1'b1;
 				RegWrite = 1'b0;
 				ExtSrc = 1'b1;
@@ -204,7 +204,7 @@ module Control(opcode, CCC, N, Z, V, set_N, set_Z, set_V, PCWrite, RegSrc, RegWr
 			end
 			
 			4'b1010: begin // LLB
-				PCWrite = 1'b1;
+				Halt = 1'b0;
 				RegSrc = 1'b1;
 				RegWrite = 1'b1;
 				ExtSrc = 1'bx;
@@ -223,7 +223,7 @@ module Control(opcode, CCC, N, Z, V, set_N, set_Z, set_V, PCWrite, RegSrc, RegWr
 			end
 			
 			4'b1011: begin // LHB
-				PCWrite = 1'b1;
+				Halt = 1'b0;
 				RegSrc = 1'b1;
 				RegWrite = 1'b1;
 				ExtSrc = 1'bx;
@@ -242,7 +242,7 @@ module Control(opcode, CCC, N, Z, V, set_N, set_Z, set_V, PCWrite, RegSrc, RegWr
 			end
 			
 			4'b1100: begin // B
-				PCWrite = 1'b1;
+				Halt = 1'b0;
 				RegSrc = 1'bx;
 				RegWrite = 1'b0;
 				ExtSrc = 1'bx;
@@ -261,7 +261,7 @@ module Control(opcode, CCC, N, Z, V, set_N, set_Z, set_V, PCWrite, RegSrc, RegWr
 			end
 			
 			4'b1101: begin // BR
-				PCWrite = 1'b1;
+				Halt = 1'b0;
 				RegSrc = 1'bx;
 				RegWrite = 1'b0;
 				ExtSrc = 1'bx;
@@ -280,7 +280,7 @@ module Control(opcode, CCC, N, Z, V, set_N, set_Z, set_V, PCWrite, RegSrc, RegWr
 			end
 			
 			4'b1110: begin // PCS
-				PCWrite = 1'b1;
+				Halt = 1'b0;
 				RegSrc = 1'bx;
 				RegWrite = 1'b1;
 				ExtSrc = 1'bx;
@@ -299,7 +299,7 @@ module Control(opcode, CCC, N, Z, V, set_N, set_Z, set_V, PCWrite, RegSrc, RegWr
 			end
 			
 			4'b1111: begin // HLT
-				PCWrite = 1'b0;
+				Halt = 1'b1;
 				RegSrc = 1'bx;
 				RegWrite = 1'b0;
 				ExtSrc = 1'bx;
@@ -318,7 +318,7 @@ module Control(opcode, CCC, N, Z, V, set_N, set_Z, set_V, PCWrite, RegSrc, RegWr
 			end
 			
 			default: begin // HLT
-				PCWrite = 1'b0;
+				Halt = 1'b1;
 				RegSrc = 1'bx;
 				RegWrite = 1'b0;
 				ExtSrc = 1'bx;
