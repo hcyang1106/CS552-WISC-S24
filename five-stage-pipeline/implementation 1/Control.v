@@ -1,6 +1,7 @@
 module Control(opcode, d_flush, CCC, N, Z, V, set_N, set_Z, set_V, Halt, RegSrc, RegWrite, ExtSrc, ByteSel, ALUSrc, MemWrite, LoadByte, PCS, MemtoReg, ALUop, BrSrc, Branch);
 	
 	input [3:0] opcode;
+	input d_flush;
 	input [2:0] CCC;
 	input N, Z, V;
 	output reg set_N, set_Z, set_V;
