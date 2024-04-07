@@ -1,4 +1,4 @@
-module Control(opcode, CCC, N, Z, V, set_N, set_Z, set_V, Halt, RegSrc, RegWrite, ExtSrc, ByteSel, ALUSrc, MemWrite, LoadByte, PCS, MemtoReg, ALUop, BrSrc, Branch);
+module Control(opcode, d_flush, CCC, N, Z, V, set_N, set_Z, set_V, Halt, RegSrc, RegWrite, ExtSrc, ByteSel, ALUSrc, MemWrite, LoadByte, PCS, MemtoReg, ALUop, BrSrc, Branch);
 	
 	input [3:0] opcode;
 	input [2:0] CCC;
@@ -16,7 +16,7 @@ module Control(opcode, CCC, N, Z, V, set_N, set_Z, set_V, Halt, RegSrc, RegWrite
 			4'b0000: begin // ADD
 				Halt = 1'b0;
 				RegSrc = 1'b0;
-				RegWrite = 1'b1;
+				RegWrite = ~d_flush;
 				ExtSrc = 1'bx;
 				ByteSel = 1'bx;
 				ALUSrc = 1'b0;
@@ -27,9 +27,9 @@ module Control(opcode, CCC, N, Z, V, set_N, set_Z, set_V, Halt, RegSrc, RegWrite
 				ALUop = 3'b000;
 				BrSrc = 1'b0;
 				Branch = 1'b0;
-				set_N = 1'b1;
-				set_V = 1'b1;
-				set_Z = 1'b1;
+				set_N = ~d_flush;
+				set_V = ~d_flush;
+				set_Z = ~d_flush;
 			end
 			
 			4'b0001: begin // SUB

@@ -15,6 +15,7 @@ module cpu (input clk, input rst_n, output hlt, output [15:0] pc);
 	wire [15:0] PC_curr, PC_next, PC_branch;
 	wire PC_wen;
 	wire halt_pc;
+	wire d_flush;
 	
 	wire [15:0] f_PC_inc, f_instru, d_PC_inc, d_instru;
 	
@@ -59,7 +60,10 @@ module cpu (input clk, input rst_n, output hlt, output [15:0] pc);
 	// fetch datapath
 	assign PC_next = flush ? PC_branch : f_PC_inc;
 	
-	assign PC_wen = (~stall | halt_pc);
+	assign PC_wen = stall ? 1'b0 :
+					flush ? 1'b1 :
+					~halt_pc;
+					
 	PC PCreg(.in(PC_next), .wen(PC_wen), .clk(clk), .rst(~rst_n), .out(PC_curr));
 	
 	assign pc = PC_curr;
@@ -68,10 +72,10 @@ module cpu (input clk, input rst_n, output hlt, output [15:0] pc);
 	memory1c InstructionMEM(.data_out(f_instru), .data_in(16'h0000), .addr(PC_curr), .enable(1'b1), .wr(1'b0), .clk(clk), .rst(~rst_n));
 	halt_detection (.opcode(f_instru[15:12]), halt_pc(halt_pc));
 	
-	IF_ID_mem iIF_ID(.clk(clk), .rst_n(~rst_n), .flush(flush), .stall(stall), .instruction_in(f_instru), .PC_inc_in(f_PC_inc), .instruction_out(d_instru), .PC_inc_out(d_PC_inc));
+	IF_ID_mem iIF_ID(.clk(clk), .rst_n(~rst_n), .flush(flush), .stall(stall), .instruction_in(f_instru), .PC_inc_in(f_PC_inc), .instruction_out(d_instru), .PC_inc_out(d_PC_inc), .flush_out(d_flush));
 	
 	// decode datapath
-	Control iControl(.opcode(d_instru[15:12]), .CCC(d_instru[11:9]), .N(N), .Z(Z), .V(V), .set_N(d_set_N), .set_Z(d_set_Z), .set_V(d_set_V), .BrSrc(d_BrSrc), .RegSrc(d_RegSrc), .RegWrite(d_RegWrite), .ExtSrc(d_ExtSrc), .ByteSel(d_ByteSel), .ALUSrc(d_ALUSrc), .MemWrite(d_MemWrite), .LoadByte(d_LoadByte), .PCS(d_PCS), .MemtoReg(d_MemtoReg), .ALUop(d_ALUop), .Branch(flush), .Halt(d_Halt));
+	Control iControl(.opcode(d_instru[15:12]), d_flush(d_flush), .CCC(d_instru[11:9]), .N(N), .Z(Z), .V(V), .set_N(d_set_N), .set_Z(d_set_Z), .set_V(d_set_V), .BrSrc(d_BrSrc), .RegSrc(d_RegSrc), .RegWrite(d_RegWrite), .ExtSrc(d_ExtSrc), .ByteSel(d_ByteSel), .ALUSrc(d_ALUSrc), .MemWrite(d_MemWrite), .LoadByte(d_LoadByte), .PCS(d_PCS), .MemtoReg(d_MemtoReg), .ALUop(d_ALUop), .Branch(flush), .Halt(d_Halt));
 	cla_16bit PC_branch_adder(.A(d_PC_inc), .B({{6{d_instru[8]}}, d_instru[8:0], 1'b0}), .Cin(1'b0), .S(PC_br_addr), .Cout(), .ovfl());
 	assign PC_branch = d_BrSrc ? d_reg_data_1 : PC_br_addr;
 	
