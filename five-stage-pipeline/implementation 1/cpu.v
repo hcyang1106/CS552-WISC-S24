@@ -61,7 +61,7 @@ module cpu (input clk, input rst_n, output hlt, output [15:0] pc);
 	assign PC_branch = BrSrc ? reg_data_1 : PC_br_addr;
 	
 	assign src_reg_2 = RegSrc ? d_instru[11:8] : d_instru[3:0];
-	RegisterFile RegFile(.clk(clk), .rst(~rst_n), .SrcReg1(d_instru[7:4]), .SrcReg2(src_reg_2), .DstReg(d_wd), .WriteReg(w_RegWrite), .DstData(reg_write_data), .SrcData1(d_reg_data_1), .SrcData2(d_reg_data_2));
+	RegisterFile RegFile(.clk(clk), .rst(~rst_n), .SrcReg1(d_instru[7:4]), .SrcReg2(src_reg_2), .DstReg(w_wd), .WriteReg(w_RegWrite), .DstData(reg_write_data), .SrcData1(d_reg_data_1), .SrcData2(d_reg_data_2));
 	
 	assign d_ext_imm = ExtSrc ? {{11{d_instru[3]}}, d_instru[3:0], 1'b0} : {{12{1'b0}}, d_instru[3:0]}
 	assign d_hbu_imm = d_instru[7:0];
@@ -93,15 +93,23 @@ module cpu (input clk, input rst_n, output hlt, output [15:0] pc);
 	
 	HalfBitMask BitMask(.Rd(x_wdata), .imm(x_hbu_imm), .ctrl(x_ByteSel), .out(x_BitMask_out));
 	
-	WB_mem ID_EX_WB_MEM(.clk(clk), .rst_n(~rst_n), .RegWrite_in(x_RegWrite), .MemtoReg_in(x_MemtoReg), .Halt_in(x_Halt), .RegWrite_out(m_RegWrite), .MemtoReg_out(m_MemtoReg), .Halt_out(m_Halt));
-	M_mem ID_EX_M_MEM(.clk(clk), .rst_n(~rst_n), .MemWrite_in(x_MemWrite), .PCS_in(x_PCS), .LoadByte_in(x_LoadByte), .MemWrite_out(m_MemWrite), .PCS_out(m_PCS), .LoadByte_out(m_LoadByte));
-	EX_M_mem iID_EX(.clk(clk), .rst_n(~rst_n), .PC_inc_in(x_PC_inc), .ALU_result_in(x_ALU_out), .wdata_in(x_wdata), .BitMask_in(x_BitMask_out), .rd_2_in(x_rd_2), .wd_in(x_wd), .PC_inc_out(m_PC_inc), .ALU_result_out(m_ALU_out), .wdata_out(m_wdata), .BitMask_out(m_BitMask_out), .rd_2_out(m_rd_2), .wd_out(m_wd));
+	WB_mem EX_M_WB_MEM(.clk(clk), .rst_n(~rst_n), .RegWrite_in(x_RegWrite), .MemtoReg_in(x_MemtoReg), .Halt_in(x_Halt), .RegWrite_out(m_RegWrite), .MemtoReg_out(m_MemtoReg), .Halt_out(m_Halt));
+	M_mem EX_M_M_MEM(.clk(clk), .rst_n(~rst_n), .MemWrite_in(x_MemWrite), .PCS_in(x_PCS), .LoadByte_in(x_LoadByte), .MemWrite_out(m_MemWrite), .PCS_out(m_PCS), .LoadByte_out(m_LoadByte));
+	EX_M_mem iEX_M(.clk(clk), .rst_n(~rst_n), .PC_inc_in(x_PC_inc), .ALU_result_in(x_ALU_out), .wdata_in(x_wdata), .BitMask_in(x_BitMask_out), .rd_2_in(x_rd_2), .wd_in(x_wd), .PC_inc_out(m_PC_inc), .ALU_result_out(m_ALU_out), .wdata_out(m_wdata), .BitMask_out(m_BitMask_out), .rd_2_out(m_rd_2), .wd_out(m_wd));
 	
 	// memory datapath
-	assign enable = MemtoReg | MemWrite;
-	memory1c DataMEM(.data_out(d_mem_out), .data_in(reg_data_2), .addr(ALU_out), .enable(enable), .wr(MemWrite), .clk(clk), .rst(~rst_n));
+	assign enable = m_MemtoReg | m_MemWrite;
+	assign mem_write_data = m_forward_wdata ? reg_write_data : m_wdata;
+	memory1c DataMEM(.data_out(m_mem_out), .data_in(mem_write_data), .addr(m_ALU_out), .enable(enable), .wr(m_MemWrite), .clk(clk), .rst(~rst_n));
 	
+	assign m_exec_out = m_PCS ? m_PCS :
+						m_LoadByte ? m_BitMask_out :
+						m_ALU_out;
+	
+	WB_mem M_WB_WB_MEM(.clk(clk), .rst_n(~rst_n), .RegWrite_in(m_RegWrite), .MemtoReg_in(m_MemtoReg), .Halt_in(m_Halt), .RegWrite_out(w_RegWrite), .MemtoReg_out(w_MemtoReg), .Halt_out(w_Halt));
+	M_WB_mem iM_WB(.clk(clk), .rst_n(~rst_n), .mem_out_in(m_mem_out), .exec_out_in(m_exec_out), .wd_in(m_wd), .mem_out_out(w_mem_out), .exec_out_out(w_exec_out), .wd_out(w_wd));
 	// writeback datapath
-	assign reg_write_data = MemtoReg ? d_mem_out : exec_out;
+	assign reg_write_data = w_MemtoReg ? w_mem_out : w_exec_out;
+	assign hlt = w_Halt;
 	
 endmodule 
