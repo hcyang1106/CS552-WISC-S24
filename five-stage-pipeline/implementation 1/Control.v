@@ -1,10 +1,10 @@
-module Control(opcode, CCC, N, Z, V, set_N, set_Z, set_V, Halt, RegSrc, RegWrite, ExtSrc, ByteSel, ALUSrc, MemWrite, LoadByte, PCS, MemtoReg, ALUop, BrReg, Branch);
+module Control(opcode, CCC, N, Z, V, set_N, set_Z, set_V, Halt, RegSrc, RegWrite, ExtSrc, ByteSel, ALUSrc, MemWrite, LoadByte, PCS, MemtoReg, ALUop, BrSrc, Branch);
 	
 	input [3:0] opcode;
 	input [2:0] CCC;
 	input N, Z, V;
 	output reg set_N, set_Z, set_V;
-	output reg Halt, RegSrc, RegWrite, ExtSrc, ByteSel, ALUSrc, MemWrite, LoadByte, PCS, MemtoReg, BrReg, Branch;
+	output reg Halt, RegSrc, RegWrite, ExtSrc, ByteSel, ALUSrc, MemWrite, LoadByte, PCS, MemtoReg, BrSrc, Branch;
 	output reg [2:0] ALUop;
 	
 	wire b_control;
@@ -25,7 +25,7 @@ module Control(opcode, CCC, N, Z, V, set_N, set_Z, set_V, Halt, RegSrc, RegWrite
 				PCS = 1'b0;
 				MemtoReg = 1'b0;
 				ALUop = 3'b000;
-				BrReg = 1'b0;
+				BrSrc = 1'b0;
 				Branch = 1'b0;
 				set_N = 1'b1;
 				set_V = 1'b1;
@@ -44,7 +44,7 @@ module Control(opcode, CCC, N, Z, V, set_N, set_Z, set_V, Halt, RegSrc, RegWrite
 				PCS = 1'b0;
 				MemtoReg = 1'b0;
 				ALUop = 3'b001;
-				BrReg = 1'b0;
+				BrSrc = 1'b0;
 				Branch = 1'b0;
 				set_N = 1'b1;
 				set_V = 1'b1;
@@ -63,7 +63,7 @@ module Control(opcode, CCC, N, Z, V, set_N, set_Z, set_V, Halt, RegSrc, RegWrite
 				PCS = 1'b0;
 				MemtoReg = 1'b0;
 				ALUop = 3'b010;
-				BrReg = 1'b0;
+				BrSrc = 1'b0;
 				Branch = 1'b0;
 				set_N = 1'b0;
 				set_V = 1'b0;
@@ -82,7 +82,7 @@ module Control(opcode, CCC, N, Z, V, set_N, set_Z, set_V, Halt, RegSrc, RegWrite
 				PCS = 1'b0;
 				MemtoReg = 1'b0;
 				ALUop = 3'b011;
-				BrReg = 1'b0;
+				BrSrc = 1'b0;
 				Branch = 1'b0;
 				set_N = 1'b0;
 				set_V = 1'b0;
@@ -101,7 +101,7 @@ module Control(opcode, CCC, N, Z, V, set_N, set_Z, set_V, Halt, RegSrc, RegWrite
 				PCS = 1'b0;
 				MemtoReg = 1'b0;
 				ALUop = 3'b100;
-				BrReg = 1'b0;
+				BrSrc = 1'b0;
 				Branch = 1'b0;
 				set_N = 1'b0;
 				set_V = 1'b0;
@@ -120,7 +120,7 @@ module Control(opcode, CCC, N, Z, V, set_N, set_Z, set_V, Halt, RegSrc, RegWrite
 				PCS = 1'b0;
 				MemtoReg = 1'b0;
 				ALUop = 3'b101;
-				BrReg = 1'b0;
+				BrSrc = 1'b0;
 				Branch = 1'b0;
 				set_N = 1'b0;
 				set_V = 1'b0;
@@ -139,7 +139,7 @@ module Control(opcode, CCC, N, Z, V, set_N, set_Z, set_V, Halt, RegSrc, RegWrite
 				PCS = 1'b0;
 				MemtoReg = 1'b0;
 				ALUop = 3'b110;
-				BrReg = 1'b0;
+				BrSrc = 1'b0;
 				Branch = 1'b0;
 				set_N = 1'b0;
 				set_V = 1'b0;
@@ -158,7 +158,7 @@ module Control(opcode, CCC, N, Z, V, set_N, set_Z, set_V, Halt, RegSrc, RegWrite
 				PCS = 1'b0;
 				MemtoReg = 1'b0;
 				ALUop = 3'b111;
-				BrReg = 1'b0;
+				BrSrc = 1'b0;
 				Branch = 1'b0;
 				set_N = 1'b0;
 				set_V = 1'b0;
@@ -177,7 +177,7 @@ module Control(opcode, CCC, N, Z, V, set_N, set_Z, set_V, Halt, RegSrc, RegWrite
 				PCS = 1'bx;
 				MemtoReg = 1'b1;
 				ALUop = 3'b000;
-				BrReg = 1'b0;
+				BrSrc = 1'b0;
 				Branch = 1'b0;
 				set_N = 1'b0;
 				set_V = 1'b0;
@@ -196,7 +196,7 @@ module Control(opcode, CCC, N, Z, V, set_N, set_Z, set_V, Halt, RegSrc, RegWrite
 				PCS = 1'bx;
 				MemtoReg = 1'b0;
 				ALUop = 3'b000;
-				BrReg = 1'b0;
+				BrSrc = 1'b0;
 				Branch = 1'b0;
 				set_N = 1'b0;
 				set_V = 1'b0;
@@ -215,7 +215,7 @@ module Control(opcode, CCC, N, Z, V, set_N, set_Z, set_V, Halt, RegSrc, RegWrite
 				PCS = 1'b0;
 				MemtoReg = 1'b0;
 				ALUop = 3'bxxx;
-				BrReg = 1'b0;
+				BrSrc = 1'b0;
 				Branch = 1'b0;
 				set_N = 1'b0;
 				set_V = 1'b0;
@@ -234,7 +234,7 @@ module Control(opcode, CCC, N, Z, V, set_N, set_Z, set_V, Halt, RegSrc, RegWrite
 				PCS = 1'b0;
 				MemtoReg = 1'b0;
 				ALUop = 3'bxxx;
-				BrReg = 1'b0;
+				BrSrc = 1'b0;
 				Branch = 1'b0;
 				set_N = 1'b0;
 				set_V = 1'b0;
@@ -253,7 +253,7 @@ module Control(opcode, CCC, N, Z, V, set_N, set_Z, set_V, Halt, RegSrc, RegWrite
 				PCS = 1'bx;
 				MemtoReg = 1'b0;
 				ALUop = 3'bxxx;
-				BrReg = 1'b0;
+				BrSrc = 1'b0;
 				Branch = b_control;
 				set_N = 1'b0;
 				set_V = 1'b0;
@@ -272,8 +272,8 @@ module Control(opcode, CCC, N, Z, V, set_N, set_Z, set_V, Halt, RegSrc, RegWrite
 				PCS = 1'bx;
 				MemtoReg = 1'b0;
 				ALUop = 3'bxxx;
-				BrReg = b_control;
-				Branch = 1'b0;
+				BrSrc = 1'b1;
+				Branch = b_control;
 				set_N = 1'b0;
 				set_V = 1'b0;
 				set_Z = 1'b0;
@@ -291,7 +291,7 @@ module Control(opcode, CCC, N, Z, V, set_N, set_Z, set_V, Halt, RegSrc, RegWrite
 				PCS = 1'b1;
 				MemtoReg = 1'b0;
 				ALUop = 3'bxxx;
-				BrReg = 1'b0;
+				BrSrc = 1'b0;
 				Branch = 1'b0;
 				set_N = 1'b0;
 				set_V = 1'b0;
@@ -310,7 +310,7 @@ module Control(opcode, CCC, N, Z, V, set_N, set_Z, set_V, Halt, RegSrc, RegWrite
 				PCS = 1'bx;
 				MemtoReg = 1'b0;
 				ALUop = 3'bxxx;
-				BrReg = 1'bx;
+				BrSrc = 1'bx;
 				Branch = 1'bx;
 				set_N = 1'b0;
 				set_V = 1'b0;
@@ -329,7 +329,7 @@ module Control(opcode, CCC, N, Z, V, set_N, set_Z, set_V, Halt, RegSrc, RegWrite
 				PCS = 1'bx;
 				MemtoReg = 1'b0;
 				ALUop = 3'bxxx;
-				BrReg = 1'bx;
+				BrSrc = 1'bx;
 				Branch = 1'bx;
 				set_N = 1'b0;
 				set_V = 1'b0;

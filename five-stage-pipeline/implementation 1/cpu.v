@@ -1,50 +1,65 @@
-module cpu (input clk, input rst_n, output hlt, output [15:0] pc);
-
-	wire [15:0] PC_curr, PC_next, PC_br_addr, PC_branch;
-	
-	wire [3:0]  src_reg_2;
-	wire [15:0] reg_write_data, reg_data_1, reg_data_2;
-	
-	wire [15:0] ALU_src_2;
-	wire [15:0] ALU_out;
-	wire [15:0] BitMask_out;
-	wire [15:0] exec_out;
-	wire N_next, Z_next, V_next, set_N, set_Z, set_V, N, Z, V;
-	
-	wire [15:0] d_mem_out;
-	wire enable;
-	wire halt_pc;
-	wire stall;
-	wire flush;
-	
-	wire [15:0] f_instru, d_instru;
-	wire [15:0] f_PC_inc, d_PC_inc;
-	
+module cpu (input clk, input rst_n, output hlt, output [15:0] pc);	
 	wire [1:0] x_forward_wdata;
 	wire [1:0] x_forward_ALU_src_1;
 	wire [1:0] x_forward_ALU_src_2;
 	wire [1:0] m_forward_wdata;
 	
-	// control
-	wire Halt;
-	wire RegSrc; 		// Select Register Read 2 src
-	wire RegWrite;		// Register file wen
-	wire ExtSrc;
-	wire ByteSel;		// Selects LLB or LHB
-	wire ALUSrc;		// Select ALU reg or immediate
-	wire MemWrite; 		// Memory wen
-	wire LoadByte;
-	wire PCS;
-	wire MemtoReg;		// Reg write src select
-	wire [2:0] ALUop;	// ALU operation selection
-	wire BrReg;	
-	wire Branch;
+	wire [3:0] d_rd_1, d_rd_2, d_wd;
+	wire [3:0] x_rd_1, x_rd_2, x_wd;
+	wire [3:0] m_rd_2, m_wd;
+	wire [3:0] w_wd;
 	
+	wire stall;
 	
+	// fetch
+	wire [15:0] PC_curr, PC_next, PC_branch;
+	wire PC_wen;
+	wire halt_pc;
+	
+	wire [15:0] f_PC_inc, f_instru, d_PC_inc, d_instru;
+	
+	// decode
+	wire flush, d_BrSrc, d_RegSrc, d_ExtSrc; 
+	wire [15:0] PC_br_addr;
+	wire [3:0] src_reg_2;
+	
+	wire [15:0] d_reg_data_1, d_reg_data_2, d_ext_imm, x_reg_data_1, x_reg_data_2, x_ext_imm;
+	wire [7:0] d_hbu_imm, x_hbu_imm;
+
+	wire d_RegWrite, d_MemtoReg, d_Halt;
+	wire d_MemWrite, d_PCS, d_LoadByte;
+	wire d_ALUSrc, d_ALUop, d_ByteSel, d_set_N, d_set_Z, d_set_V;
+	
+	// execute
+	wire N, Z, V, N_next, Z_next, V_next;
+	wire [15:0] ALU_src_1, ALU_src_2;
+	
+	wire [15:0] x_PC_inc, x_wdata, x_ALU_out, x_BitMask_out, m_PC_inc, m_wdata, m_ALU_out, m_BitMask_out;
+	
+	wire x_RegWrite, x_MemtoReg, x_Halt;
+	wire x_MemWrite, x_PCS, x_LoadByte;
+	wire x_ALUSrc, x_ALUop, x_ByteSel, x_set_N, x_set_Z, x_set_V;
+	
+	// memory
+	wire [15:0] mem_write_data;
+	wire enable;
+	
+	wire [15:0] m_mem_out, m_exec_out, w_mem_out, w_exec_out;
+	
+	wire m_RegWrite, m_MemtoReg, m_Halt;
+	wire m_MemWrite, m_PCS, m_LoadByte;
+	
+	// writeback
+	wire [15:0] reg_write_data;
+	wire w_RegWrite, w_MemtoReg, w_Halt;
+	
+	ForwardingUnit iForward(.EX_MEM_RegWd(m_wd), .MEM_WB_RegWd(w_wd), .EX_MEM_RegWrite(m_RegWrite), .MEM_WB_RegWrite(w_RegWrite), .ID_EX_RegRd1(x_rd_1), .ID_EX_RegRd2(x_rd_2), .EX_MEM_RegRd2(m_rd_2), .ALUsrc(x_ALUSrc), .ForwardA(x_forward_ALU_src_1), .ForwardB(x_forward_ALU_src_2), .ForwardC(x_forward_wdata), .ForwardD(m_forward_wdata));
+	hazard_detection iHazard_Detection(.EX_wd(x_wd), .EX_MemtoReg(x_MemtoReg), .EX_RegWrite(x_RegWrite), .EX_set_N(x_set_N), .EX_set_V(x_set_V), .EX_set_Z(x_set_Z), .instruction(d_instru), .stall(stall));
+
 	// fetch datapath
 	assign PC_next = flush ? PC_branch : f_PC_inc;
 	
-	assign PC_wen = (stall | halt_pc);
+	assign PC_wen = (~stall | halt_pc);
 	PC PCreg(.in(PC_next), .wen(PC_wen), .clk(clk), .rst(~rst_n), .out(PC_curr));
 	
 	assign pc = PC_curr;
@@ -56,14 +71,14 @@ module cpu (input clk, input rst_n, output hlt, output [15:0] pc);
 	IF_ID_mem iIF_ID(.clk(clk), .rst_n(~rst_n), .flush(flush), .stall(stall), .instruction_in(f_instru), .PC_inc_in(f_PC_inc), .instruction_out(d_instru), .PC_inc_out(d_PC_inc));
 	
 	// decode datapath
-	Control iControl(.opcode(d_instru[15:12]), .CCC(d_instru[11:9]), .N(N), .Z(Z), .V(V), .set_N(d_set_N), .set_Z(d_set_Z), .set_V(d_set_V), .BrSrc(d_BrSrc), .RegSrc(d_RegSrc), .RegWrite(d_RegWrite), .ExtSrc(d_ExtSrc), .ByteSel(d_ByteSel), .ALUSrc(d_ALUSrc), .MemWrite(d_MemWrite), .LoadByte(d_LoadByte), .PCS(d_PCS), .MemtoReg(d_MemtoReg), .ALUop(d_ALUop), .BrReg(d_BrReg), .Branch(d_Branch), .Halt(d_Halt));
+	Control iControl(.opcode(d_instru[15:12]), .CCC(d_instru[11:9]), .N(N), .Z(Z), .V(V), .set_N(d_set_N), .set_Z(d_set_Z), .set_V(d_set_V), .BrSrc(d_BrSrc), .RegSrc(d_RegSrc), .RegWrite(d_RegWrite), .ExtSrc(d_ExtSrc), .ByteSel(d_ByteSel), .ALUSrc(d_ALUSrc), .MemWrite(d_MemWrite), .LoadByte(d_LoadByte), .PCS(d_PCS), .MemtoReg(d_MemtoReg), .ALUop(d_ALUop), .Branch(flush), .Halt(d_Halt));
 	cla_16bit PC_branch_adder(.A(d_PC_inc), .B({{6{d_instru[8]}}, d_instru[8:0], 1'b0}), .Cin(1'b0), .S(PC_br_addr), .Cout(), .ovfl());
-	assign PC_branch = BrSrc ? reg_data_1 : PC_br_addr;
+	assign PC_branch = d_BrSrc ? d_reg_data_1 : PC_br_addr;
 	
-	assign src_reg_2 = RegSrc ? d_instru[11:8] : d_instru[3:0];
+	assign src_reg_2 = d_RegSrc ? d_instru[11:8] : d_instru[3:0];
 	RegisterFile RegFile(.clk(clk), .rst(~rst_n), .SrcReg1(d_instru[7:4]), .SrcReg2(src_reg_2), .DstReg(w_wd), .WriteReg(w_RegWrite), .DstData(reg_write_data), .SrcData1(d_reg_data_1), .SrcData2(d_reg_data_2));
 	
-	assign d_ext_imm = ExtSrc ? {{11{d_instru[3]}}, d_instru[3:0], 1'b0} : {{12{1'b0}}, d_instru[3:0]}
+	assign d_ext_imm = d_ExtSrc ? {{11{d_instru[3]}}, d_instru[3:0], 1'b0} : {{12{1'b0}}, d_instru[3:0]}
 	assign d_hbu_imm = d_instru[7:0];
 	assign d_rd_1 = d_instru[7:4];
 	assign d_rd_2 = src_reg_2;
@@ -102,7 +117,7 @@ module cpu (input clk, input rst_n, output hlt, output [15:0] pc);
 	assign mem_write_data = m_forward_wdata ? reg_write_data : m_wdata;
 	memory1c DataMEM(.data_out(m_mem_out), .data_in(mem_write_data), .addr(m_ALU_out), .enable(enable), .wr(m_MemWrite), .clk(clk), .rst(~rst_n));
 	
-	assign m_exec_out = m_PCS ? m_PCS :
+	assign m_exec_out = m_PCS ? m_PC_inc :
 						m_LoadByte ? m_BitMask_out :
 						m_ALU_out;
 	
