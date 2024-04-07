@@ -141,13 +141,13 @@ module cpu_ptb();
    assign Inst = DUT.f_instru;
    //Instruction fetched in the current cycle
    
-   assign RegWrite = DUT.w_RegWrite;
+   assign RegWrite = DUT.m_RegWrite;
    // Is register file being written to in this cycle, one bit signal (1 means yes, 0 means no)
   
-   assign WriteRegister = DUT.w_wd;
+   assign WriteRegister = DUT.m_wd;
    // If above is true, this should hold the name of the register being written to. (4 bit signal)
    
-   assign WriteData = DUT.reg_write_data;
+   assign WriteData = DUT.m_MemtoReg ? DUT.m_mem_out : DUT.m_exec_out;
    // If above is true, this should hold the Data being written to the register. (16 bits)
    
    assign MemRead =  (DUT.m_MemtoReg);

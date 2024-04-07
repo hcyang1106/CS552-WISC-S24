@@ -46,7 +46,7 @@ module ALU(a, b, ALUOp, out, N, Z, V);
 	paddsb Paddsb(.A(a), .B(b), .out(paddsb_out));
 	
 	// set N
-	always @(ALUOp) begin
+	always @(*) begin
 		case (ALUOp) 
 			3'b000: N = add_out[15];
 			3'b001: N = add_out[15];
@@ -55,7 +55,7 @@ module ALU(a, b, ALUOp, out, N, Z, V);
 	end
 	
 	// set Z
-	always @(ALUOp) begin
+	always @(*) begin
 		case (ALUOp) 
 			3'b000: Z = (add_out == 16'h0000);
 			3'b001: Z = (add_out == 16'h0000);
@@ -68,7 +68,7 @@ module ALU(a, b, ALUOp, out, N, Z, V);
 	end
 	
 	// set V
-	always @(ALUOp) begin
+	always @(*) begin
 		case (ALUOp) 
 			3'b000: V = ovfl;
 			3'b001: V = ovfl;
@@ -78,7 +78,7 @@ module ALU(a, b, ALUOp, out, N, Z, V);
 	
 	
 	// selection
-	always @(ALUOp) begin
+	always @(*) begin
 		case (ALUOp) 
 			3'b000: out = add_out;
 			3'b001: out = add_out;
