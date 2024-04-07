@@ -70,19 +70,19 @@ module cpu (input clk, input rst_n, output hlt, output [15:0] pc);
 	cla_16bit PC_increment(.A(PC_curr), .B(16'h0002), .Cin(1'b0), .S(f_PC_inc), .Cout(), .ovfl());
 	
 	memory1c InstructionMEM(.data_out(f_instru), .data_in(16'h0000), .addr(PC_curr), .enable(1'b1), .wr(1'b0), .clk(clk), .rst(~rst_n));
-	halt_detection (.opcode(f_instru[15:12]), halt_pc(halt_pc));
+	halt_detection (.opcode(f_instru[15:12]), .halt_pc(halt_pc));
 	
 	IF_ID_mem iIF_ID(.clk(clk), .rst_n(~rst_n), .flush(flush), .stall(stall), .instruction_in(f_instru), .PC_inc_in(f_PC_inc), .instruction_out(d_instru), .PC_inc_out(d_PC_inc), .flush_out(d_flush));
 	
 	// decode datapath
-	Control iControl(.opcode(d_instru[15:12]), d_flush(d_flush), .CCC(d_instru[11:9]), .N(N), .Z(Z), .V(V), .set_N(d_set_N), .set_Z(d_set_Z), .set_V(d_set_V), .BrSrc(d_BrSrc), .RegSrc(d_RegSrc), .RegWrite(d_RegWrite), .ExtSrc(d_ExtSrc), .ByteSel(d_ByteSel), .ALUSrc(d_ALUSrc), .MemWrite(d_MemWrite), .LoadByte(d_LoadByte), .PCS(d_PCS), .MemtoReg(d_MemtoReg), .ALUop(d_ALUop), .Branch(flush), .Halt(d_Halt));
+	Control iControl(.opcode(d_instru[15:12]), .d_flush(d_flush), .CCC(d_instru[11:9]), .N(N), .Z(Z), .V(V), .set_N(d_set_N), .set_Z(d_set_Z), .set_V(d_set_V), .BrSrc(d_BrSrc), .RegSrc(d_RegSrc), .RegWrite(d_RegWrite), .ExtSrc(d_ExtSrc), .ByteSel(d_ByteSel), .ALUSrc(d_ALUSrc), .MemWrite(d_MemWrite), .LoadByte(d_LoadByte), .PCS(d_PCS), .MemtoReg(d_MemtoReg), .ALUop(d_ALUop), .Branch(flush), .Halt(d_Halt));
 	cla_16bit PC_branch_adder(.A(d_PC_inc), .B({{6{d_instru[8]}}, d_instru[8:0], 1'b0}), .Cin(1'b0), .S(PC_br_addr), .Cout(), .ovfl());
 	assign PC_branch = d_BrSrc ? d_reg_data_1 : PC_br_addr;
 	
 	assign src_reg_2 = d_RegSrc ? d_instru[11:8] : d_instru[3:0];
 	RegisterFile RegFile(.clk(clk), .rst(~rst_n), .SrcReg1(d_instru[7:4]), .SrcReg2(src_reg_2), .DstReg(w_wd), .WriteReg(w_RegWrite), .DstData(reg_write_data), .SrcData1(d_reg_data_1), .SrcData2(d_reg_data_2));
 	
-	assign d_ext_imm = d_ExtSrc ? {{11{d_instru[3]}}, d_instru[3:0], 1'b0} : {{12{1'b0}}, d_instru[3:0]}
+	assign d_ext_imm = d_ExtSrc ? {{11{d_instru[3]}}, d_instru[3:0], 1'b0} : {{12{1'b0}}, d_instru[3:0]};
 	assign d_hbu_imm = d_instru[7:0];
 	assign d_rd_1 = d_instru[7:4];
 	assign d_rd_2 = src_reg_2;
@@ -90,7 +90,7 @@ module cpu (input clk, input rst_n, output hlt, output [15:0] pc);
 	
 	WB_mem ID_EX_WB_MEM(.clk(clk), .rst_n(~rst_n), .RegWrite_in(d_RegWrite), .MemtoReg_in(d_MemtoReg), .Halt_in(d_Halt), .RegWrite_out(x_RegWrite), .MemtoReg_out(x_MemtoReg), .Halt_out(x_Halt));
 	M_mem ID_EX_M_MEM(.clk(clk), .rst_n(~rst_n), .MemWrite_in(d_MemWrite), .PCS_in(d_PCS), .LoadByte_in(d_LoadByte), .MemWrite_out(x_MemWrite), .PCS_out(x_PCS), .LoadByte_out(x_LoadByte));
-	EX_mem ID_EX_EX_MEM(.clk(clk), .rst_n(~rst_n), .ALUsrc_in(d_ALUSrc), .ALUop_in(d_ALUop), .ByteSel_in(d_ByteSel), .set_N_in(d_set_N), set_V_in(d_set_V), set_Z_in(d_set_Z), .ALUsrc_out(x_ALUSrc), .ALUop_out(x_ALUop), .ByteSel_out(x_ByteSel), .set_N_out(x_set_N), set_V_out(x_set_V), set_Z_out(x_set_Z));
+	EX_mem ID_EX_EX_MEM(.clk(clk), .rst_n(~rst_n), .ALUsrc_in(d_ALUSrc), .ALUop_in(d_ALUop), .ByteSel_in(d_ByteSel), .set_N_in(d_set_N), .set_V_in(d_set_V), .set_Z_in(d_set_Z), .ALUsrc_out(x_ALUSrc), .ALUop_out(x_ALUop), .ByteSel_out(x_ByteSel), .set_N_out(x_set_N), .set_V_out(x_set_V), .set_Z_out(x_set_Z));
 	ID_EX_mem iID_EX(.clk(clk), .rst_n(~rst_n), .PC_inc_in(d_PC_inc), .rdata_1_in(d_reg_data_1), .rdata_2_in(d_reg_data_2), .ext_data_in(d_ext_imm), .hbu_imm_in(d_hbu_imm), .rd_1_in(d_rd_1), .rd_2_in(d_rd_2), .wd_in(d_wd), .PC_out(x_PC_inc), .rdata_1_out(x_reg_data_1), .rdata_2_out(x_reg_data_2), .ext_data_out(x_ext_imm), .hbu_imm_out(x_hbu_imm), .rd_1_out(x_rd_1), .rd_2_out(x_rd_2), .wd_out(x_wd));
 	
 	// execution datapath
