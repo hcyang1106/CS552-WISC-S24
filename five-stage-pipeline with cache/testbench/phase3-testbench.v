@@ -169,7 +169,87 @@ module cache_tb;
 	#10;
 	memValid = 0;
 
-        // Add more test cases as needed
+         // Test case 3: Cache read hit
+        #35;
+        cacheEnable = 1;
+        cacheWrite = 0;
+        procAddress = 16'h1232;
+
+
+        // Test case 4: Cache write miss
+        #35;
+        cacheEnable = 1;
+        cacheWrite = 1;
+        procAddress = 16'h1264;
+        procDataIn = 16'hABCD;
+
+
+        #55;
+        memValid = 1;
+        memDataOut = 16'hABCD;
+
+	#10;
+	memValid = 0;
+
+	#10;
+        memValid = 1;
+        memDataOut = 16'hABCE;
+
+	#10;
+	memValid = 0;
+
+
+	#10;
+        memValid = 1;
+        memDataOut = 16'hABCF;
+
+	#10;
+	memValid = 0;
+
+
+	#10;
+        memValid = 1;
+        memDataOut = 16'hABA0;
+
+	#10;
+	memValid = 0;
+
+	#10; 
+        memValid = 1;
+        memDataOut = 16'hABA1;
+
+	#10;
+	memValid = 0;
+
+	#10;
+        memValid = 1;
+        memDataOut = 16'hABA2;
+
+	#10;
+	memValid = 0;
+
+
+	#10;
+        memValid = 1;
+        memDataOut = 16'hABA3;
+
+	#10;
+	memValid = 0;
+
+
+	#10;
+        memValid = 1;
+        memDataOut = 16'hABA4; // 8
+
+	#10;
+	memValid = 0;
+
+         // Test case 5: Cache write hit
+        #35;
+        cacheEnable = 1;
+        cacheWrite = 1;
+        procAddress = 16'h1262;
+        procDataIn = 16'hABCD;
 
         // Finish simulation
         #100;
