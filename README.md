@@ -8,3 +8,6 @@ Implementation 2
 
 Pipelined 
 ![Pipelined](./images/CPU_pipeline.png)
+
+Cache
+![Cache](./images/cache.png)
