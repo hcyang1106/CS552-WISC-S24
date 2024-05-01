@@ -10,4 +10,4 @@ Pipelined
 ![Pipelined](./images/CPU_pipeline.png)
 
 Cache
-![Cache](./images/cache.png)
+![Cache](./images/cache.jpg)
