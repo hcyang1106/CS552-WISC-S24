@@ -53,6 +53,13 @@ module cpu (input clk, input rst_n, output hlt, output [15:0] pc);
 	
 	wire m_RegWrite, m_MemtoReg, m_Halt;
 	wire m_MemWrite, m_PCS, m_LoadByte;
+
+	wire D_memory_data_valid;
+	wire D_mem_address;
+	wire D_mem_enable;
+	wire Dmem_out;
+	wire D_data_in;
+	wire D_cache_stall;
 	
 	// writeback
 	wire [15:0] reg_write_data;
@@ -75,7 +82,7 @@ module cpu (input clk, input rst_n, output hlt, output [15:0] pc);
 	
 	instruction_cache DUT(.clk(clk), .rst_n(~rst_n), .data_out(f_instru), .data_in(Imem_out), .addr(PC_curr), .wr(1'b0), .memory_data_valid(memory_data_valid), .memory_address(I_mem_address), .stall(I_cache_stall), .mem_enable(mem_enable));   
 	memory4c Imem(.data_out(Imem_out), .data_in(16'h0000), .addr(I_mem_address), .enable(mem_enable), .wr(1'b0), .clk(clk), .rst(~rst_n), .data_valid(memory_data_valid));
-    assign stall = I_cache_stall | hazard_stall;
+    assign stall = I_cache_stall | hazard_stall | D_cache_stall;
 	
 	// memory1c InstructionMEM(.data_out(f_instru), .data_in(16'h0000), .addr(PC_curr), .enable(1'b1), .wr(1'b0), .clk(clk), .rst(~rst_n));
 	halt_detection halt_detect(.opcode(f_instru[15:12]), .halt_pc(halt_pc));
@@ -133,8 +140,12 @@ module cpu (input clk, input rst_n, output hlt, output [15:0] pc);
 	// memory datapath
 	assign enable = m_MemtoReg | m_MemWrite;
 	assign mem_write_data = m_forward_wdata ? reg_write_data : m_wdata;
-	memory1c DataMEM(.data_out(m_mem_out), .data_in(mem_write_data), .addr(m_ALU_out), .enable(enable), .wr(m_MemWrite), .clk(clk), .rst(~rst_n));
+	assign D_data_in = m_MemWrite ? mem_write_data : Dmem_out;
 	
+	// memory1c DataMEM(.data_out(m_mem_out), .data_in(mem_write_data), .addr(m_ALU_out), .enable(enable), .wr(m_MemWrite), .clk(clk), .rst(~rst_n));
+	instruction_cache Dcache(.clk(clk), .rst_n(~rst_n), .data_out(m_mem_out), .data_in(D_data_in), .addr(m_ALU_out), .wr(m_MemWrite), .memory_data_valid(D_memory_data_valid), .memory_address(D_mem_address), .stall(D_cache_stall), .mem_enable(D_mem_enable));   
+	memory4c Dmem(.data_out(Dmem_out), .data_in(mem_write_data), .addr(D_mem_address), .enable(D_mem_enable), .wr(m_MemWrite), .clk(clk), .rst(~rst_n), .data_valid(D_memory_data_valid));
+
 	assign m_exec_out = m_PCS ? m_PC_inc :
 						m_LoadByte ? m_BitMask_out :
 						m_ALU_out;
