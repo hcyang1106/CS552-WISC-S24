@@ -11,3 +11,6 @@ Pipelined
 
 Cache
 ![Cache](./images/cache.jpg)
+
+Pipelined + Cache 
+![Cache](./images/CPU_cache.png)
