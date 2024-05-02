@@ -60,6 +60,7 @@ module cpu (input clk, input rst_n, output hlt, output [15:0] pc);
 	wire Dmem_out;
 	wire D_data_in;
 	wire D_cache_stall;
+	wire D_mem_write;
 	
 	// writeback
 	wire [15:0] reg_write_data;
@@ -143,8 +144,8 @@ module cpu (input clk, input rst_n, output hlt, output [15:0] pc);
 	assign D_data_in = m_MemWrite ? mem_write_data : Dmem_out;
 	
 	// memory1c DataMEM(.data_out(m_mem_out), .data_in(mem_write_data), .addr(m_ALU_out), .enable(enable), .wr(m_MemWrite), .clk(clk), .rst(~rst_n));
-	instruction_cache Dcache(.clk(clk), .rst_n(~rst_n), .data_out(m_mem_out), .data_in(D_data_in), .addr(m_ALU_out), .wr(m_MemWrite), .memory_data_valid(D_memory_data_valid), .memory_address(D_mem_address), .stall(D_cache_stall), .mem_enable(D_mem_enable));   
-	memory4c Dmem(.data_out(Dmem_out), .data_in(mem_write_data), .addr(D_mem_address), .enable(D_mem_enable), .wr(m_MemWrite), .clk(clk), .rst(~rst_n), .data_valid(D_memory_data_valid));
+	cache Dcache(.clk(clk), .rst_n(~rst_n), .data_out(m_mem_out), .data_in(D_data_in), .addr(m_ALU_out), .wr(m_MemWrite), .memory_data_valid(D_memory_data_valid), .memory_address(D_mem_address), .stall(D_cache_stall), .mem_enable(D_mem_enable), .mem_write(D_mem_write));   
+	memory4c Dmem(.data_out(Dmem_out), .data_in(mem_write_data), .addr(D_mem_address), .enable(D_mem_enable), .wr(D_mem_write), .clk(clk), .rst(~rst_n), .data_valid(D_memory_data_valid));
 
 	assign m_exec_out = m_PCS ? m_PC_inc :
 						m_LoadByte ? m_BitMask_out :
