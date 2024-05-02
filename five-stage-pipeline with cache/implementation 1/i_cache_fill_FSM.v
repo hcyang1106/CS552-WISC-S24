@@ -1,4 +1,4 @@
-module i_cache_fill_FSM(clk, rst_n, miss_detected, miss_address, fsm_busy, write_data_array, write_tag_array,memory_address, memory_data, memory_data_valid, mem_enable, byte_count);
+module i_cache_fill_FSM(clk, rst_n, miss_detected, miss_address, fsm_busy, write_data_array, write_tag_array,memory_address, memory_data, memory_data_valid, mem_enable, byte_count_out);
 	input clk, rst_n;
 	input miss_detected; // active high when tag match logic detects a miss
 	input [15:0] miss_address; // address that missed the cache
@@ -7,7 +7,7 @@ module i_cache_fill_FSM(clk, rst_n, miss_detected, miss_address, fsm_busy, write
 	output write_tag_array; // write enable to cache tag array to signal when all words are filled in to data array
 	output [15:0] memory_address; // address to read from memory
 	output mem_enable; // enable reads from mem
-	output [2:0] byte_count;
+	output [2:0] byte_count_out;
 	input [15:0] memory_data; // data returned by memory (after delay)
 	input memory_data_valid; // active high indicates valid data returning on memory bus
 	
@@ -17,8 +17,10 @@ module i_cache_fill_FSM(clk, rst_n, miss_detected, miss_address, fsm_busy, write
 	wire [3:0] word_addr_count, word_addr_count_inc;
 	wire [15:0] address;
 	
-	add_4bit incrementer(.Sum(byte_count_next), .Ovfl(), .A(byte_count), .B(4'b0001));
-	add_4bit word_incrementer(.Sum(word_addr_count_inc), .Ovfl(), .A({1'b0, memory_address[3:1]}), .B(4'b0001));
+	assign byte_count_out = byte_count[2:0];
+	
+	cla_4bit incrementer(.S(byte_count_next), .ovfl(), .A(byte_count), .B(4'b0001), .Cin(1'b0), .Cout());
+	cla_4bit word_incrementer(.S(word_addr_count_inc), .ovfl(), .A({1'b0, memory_address[3:1]}), .B(4'b0001), .Cin(1'b0), .Cout());
 	
 	dff state_reg(.clk(clk), .rst(rst_n), .q(state), .d(next_state), .wen(1'b1));
 	dff count[3:0](.clk(clk), .rst(init_count), .q(byte_count), .d(byte_count_next), .wen(increment));
@@ -40,41 +42,4 @@ module i_cache_fill_FSM(clk, rst_n, miss_detected, miss_address, fsm_busy, write
 	assign write_data_array = state ? ((memory_data_valid & (byte_count != 4'b1000)) ? 1'b1 : 1'b0) : 1'b0;
 
 	assign write_tag_array = state ? ((byte_count == 4'b0111) ? 1'b1 : 1'b0) : 1'b0;
-	
-	
-endmodule
-
-module full_adder_1bit(
-    input A,
-    input B,
-    input Cin,
-    output S,
-    output Cout
-);
-
-wire w1, w2, w3;
-
-xor (w1, A, B);
-xor (S, w1, Cin);
-
-and (w2, w1, Cin);
-and (w3, A, B);
-or (Cout, w2, w3);
-
-endmodule
-
-module add_4bit (Sum, Ovfl, A, B);
-    input [3:0] A, B; //Input values
-    output [3:0] Sum; //sum output
-    output Ovfl; //To indicate overflow
-
-    wire [3:0] carries; 
-
-    full_adder_1bit FA0(.A(A[0]), .B(B[0]), .Cin(1'b0), .S(Sum[0]), .Cout(carries[0]));
-    full_adder_1bit FA1(.A(A[1]), .B(B[1]), .Cin(carries[0]), .S(Sum[1]), .Cout(carries[1]));
-    full_adder_1bit FA2(.A(A[2]), .B(B[2]), .Cin(carries[1]), .S(Sum[2]), .Cout(carries[2]));
-    full_adder_1bit FA3(.A(A[3]), .B(B[3]), .Cin(carries[2]), .S(Sum[3]), .Cout(carries[3]));
-
-    assign Ovfl = carries[3];
-
 endmodule

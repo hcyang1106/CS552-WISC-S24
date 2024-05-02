@@ -48,7 +48,7 @@ module instruction_cache_controller(clk, rst_n, addr, memory_data_valid, MetaDat
 	dff set_line_reg(.q(set_line_out), .d(next_set_line), .wen(wen_set_line), .clk(clk), .rst(rst_n));
 	dff V_old(.q(v_bit_old), .d(next_v_bit_old), .wen(v_bit_old_wen), .clk(clk), .rst(rst_n));
 	
-	i_cache_fill_FSM FSM(.clk(clk), .rst_n(rst_n), .miss_detected(miss_detected), .miss_address(miss_address), .fsm_busy(fsm_busy), .mem_enable(mem_enable), .write_data_array(write_data_array), .write_tag_array(write_tag_array), .memory_address(memory_address), .memory_data(), .memory_data_valid(memory_data_valid), .byte_count(byte_count));
+	i_cache_fill_FSM FSM(.clk(clk), .rst_n(rst_n), .miss_detected(miss_detected), .miss_address(miss_address), .fsm_busy(fsm_busy), .mem_enable(mem_enable), .write_data_array(write_data_array), .write_tag_array(write_tag_array), .memory_address(memory_address), .memory_data(), .memory_data_valid(memory_data_valid), .byte_count_out(byte_count));
 	
 	assign tag = miss_address[15:10];
 	assign LRU_bit = MetaDataArray_tag[7];
