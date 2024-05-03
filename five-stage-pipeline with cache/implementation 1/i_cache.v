@@ -60,11 +60,11 @@ module cache_controller(clk, rst_n, wr, addr, enable, memory_data_valid, MetaDat
 	always @(*) begin
 		case (state)
 			4'b0000: begin // fill miss
-				next_state = enable ? (fsm_busy ? 4'b0000 : 4'b0110) : 4'b0011;
+				next_state = (fsm_busy ? 4'b0000 : 4'b0110);
 				set_line = fsm_busy ? LRU_line : (LRU_line ? 1'b0: 1'b1);
 				next_LRU_line = 1'b0;
 				wen_LRU_line = 1'b0;
-				miss_detected = enable ? 1'b1 : 1'b0;
+				miss_detected = 1'b1;
 				wen_miss_addr = 1'b0;
 				
 				update_MetaData = fsm_busy ? write_tag_array : 1'b0;
@@ -79,7 +79,7 @@ module cache_controller(clk, rst_n, wr, addr, enable, memory_data_valid, MetaDat
 				
 				mem_write = 1'b0;
 				
-				stall = enable ? 1'b1 : 1'b0;
+				stall = 1'b1;
 			end
 			
 			4'b0001: begin // check line 1
@@ -291,7 +291,7 @@ module cache_controller(clk, rst_n, wr, addr, enable, memory_data_valid, MetaDat
 			
 			4'b1010: begin // write through
 				next_state = 4'b0011;
-				set_line = set_line;
+				set_line = set_line_out;
 				next_LRU_line = 1'b0;
 				wen_LRU_line = 1'b0;
 				miss_detected = 1'b0;
@@ -452,5 +452,4 @@ module cache_controller(clk, rst_n, wr, addr, enable, memory_data_valid, MetaDat
 		endcase
 	
 	end
-
 endmodule
