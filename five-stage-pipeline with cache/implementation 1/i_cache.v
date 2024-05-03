@@ -32,28 +32,30 @@ module cache_controller(clk, rst_n, wr, addr, enable, memory_data_valid, MetaDat
 	output reg set_line, update_MetaData, new_LRU_bit, new_v_bit, stall, mem_write;
 	
 	wire LRU_line;
-	wire [15:0] miss_address;
+	wire [15:0] miss_address, memory_address_fill;
 	wire [3:0] state;
 	wire [5:0] tag, MDA_tag;
 	wire fsm_busy, write_tag_array;
 	wire v_bit_old, set_line_out;
-	reg next_set_line, wen_set_line;
+	reg next_set_line, wen_set_line, wen_miss_addr;
 	reg next_v_bit_old, v_bit_old_wen;
 	reg next_LRU_line, wen_LRU_line, miss_detected;
 	reg [3:0] next_state;
 	
-	dff miss_addr[15:0](.q(miss_address), .d(addr), .wen(~stall), .clk(clk), .rst(rst_n));
+	dff miss_addr[15:0](.q(miss_address), .d(addr), .wen(wen_miss_addr), .clk(clk), .rst(rst_n));
 	dff state_reg[3:0](.q(state), .d(next_state), .wen(1'b1), .clk(clk), .rst(rst_n));
 	dff LRU(.q(LRU_line), .d(next_LRU_line), .wen(wen_LRU_line), .clk(clk), .rst(rst_n));
 	dff set_line_reg(.q(set_line_out), .d(next_set_line), .wen(wen_set_line), .clk(clk), .rst(rst_n));
 	dff V_old(.q(v_bit_old), .d(next_v_bit_old), .wen(v_bit_old_wen), .clk(clk), .rst(rst_n));
 	
-	i_cache_fill_FSM FSM(.clk(clk), .rst_n(rst_n), .miss_detected(miss_detected), .miss_address(miss_address), .fsm_busy(fsm_busy), .mem_enable(mem_enable), .write_data_array(write_data_array), .write_tag_array(write_tag_array), .memory_address(memory_address), .memory_data(), .memory_data_valid(memory_data_valid), .byte_count_out(byte_count));
+	i_cache_fill_FSM FSM(.clk(clk), .rst_n(rst_n), .miss_detected(miss_detected), .miss_address(miss_address), .fsm_busy(fsm_busy), .mem_enable(mem_enable), .write_data_array(write_data_array), .write_tag_array(write_tag_array), .memory_address(memory_address_fill), .memory_data(), .memory_data_valid(memory_data_valid), .byte_count_out(byte_count));
 	
 	assign tag = miss_address[15:10];
 	assign LRU_bit = MetaDataArray_tag[7];
 	assign v_bit = MetaDataArray_tag[6];
 	assign MDA_tag = MetaDataArray_tag[5:0];
+	
+	assign memory_address = mem_write ? miss_address : memory_address_fill;
 	
 	always @(*) begin
 		case (state)
@@ -63,6 +65,7 @@ module cache_controller(clk, rst_n, wr, addr, enable, memory_data_valid, MetaDat
 				next_LRU_line = 1'b0;
 				wen_LRU_line = 1'b0;
 				miss_detected = enable ? 1'b1 : 1'b0;
+				wen_miss_addr = 1'b0;
 				
 				update_MetaData = fsm_busy ? write_tag_array : 1'b0;
 				new_LRU_bit = 1'b0;
@@ -85,6 +88,7 @@ module cache_controller(clk, rst_n, wr, addr, enable, memory_data_valid, MetaDat
 				next_LRU_line = 1'b0;
 				wen_LRU_line = LRU_bit;
 				miss_detected = 1'b0;
+				wen_miss_addr = 1'b0;
 				
 				update_MetaData = 1'b0;
 				new_LRU_bit = 1'b0;
@@ -107,6 +111,7 @@ module cache_controller(clk, rst_n, wr, addr, enable, memory_data_valid, MetaDat
 				next_LRU_line = 1'b1;
 				wen_LRU_line = LRU_bit;
 				miss_detected = 1'b0;
+				wen_miss_addr = 1'b1;
 				
 				update_MetaData = 1'b0;
 				new_LRU_bit = 1'b0;
@@ -129,6 +134,7 @@ module cache_controller(clk, rst_n, wr, addr, enable, memory_data_valid, MetaDat
 				next_LRU_line = 1'b0;
 				wen_LRU_line = 1'b0;
 				miss_detected = 1'b0;
+				wen_miss_addr = 1'b0;
 				
 				update_MetaData = 1'b0;
 				new_LRU_bit = 1'b0;
@@ -151,6 +157,7 @@ module cache_controller(clk, rst_n, wr, addr, enable, memory_data_valid, MetaDat
 				next_LRU_line = 1'b0;
 				wen_LRU_line = 1'b0;
 				miss_detected = 1'b0;
+				wen_miss_addr = 1'b0;
 				
 				update_MetaData = 1'b1;
 				new_LRU_bit = 1'b0;
@@ -173,6 +180,7 @@ module cache_controller(clk, rst_n, wr, addr, enable, memory_data_valid, MetaDat
 				next_LRU_line = 1'b0;
 				wen_LRU_line = 1'b0;
 				miss_detected = 1'b0;
+				wen_miss_addr = 1'b0;
 				
 				update_MetaData = 1'b1;
 				new_LRU_bit = 1'b0;
@@ -195,6 +203,7 @@ module cache_controller(clk, rst_n, wr, addr, enable, memory_data_valid, MetaDat
 				next_LRU_line = 1'b0;
 				wen_LRU_line = 1'b0;
 				miss_detected = 1'b0;
+				wen_miss_addr = 1'b0;
 				
 				update_MetaData = 1'b0;
 				new_LRU_bit = 1'b0;
@@ -217,6 +226,7 @@ module cache_controller(clk, rst_n, wr, addr, enable, memory_data_valid, MetaDat
 				next_LRU_line = 1'b0;
 				wen_LRU_line = 1'b0;
 				miss_detected = 1'b0;
+				wen_miss_addr = 1'b0;
 				
 				update_MetaData = 1'b1;
 				new_LRU_bit = 1'b1;
@@ -239,6 +249,7 @@ module cache_controller(clk, rst_n, wr, addr, enable, memory_data_valid, MetaDat
 				next_LRU_line = 1'b0;
 				wen_LRU_line = 1'b0;
 				miss_detected = 1'b0;
+				wen_miss_addr = 1'b0;
 				
 				update_MetaData = 1'b1;
 				new_LRU_bit = 1'b1;
@@ -261,6 +272,7 @@ module cache_controller(clk, rst_n, wr, addr, enable, memory_data_valid, MetaDat
 				next_LRU_line = 1'b0;
 				wen_LRU_line = 1'b0;
 				miss_detected = 1'b0;
+				wen_miss_addr = 1'b0;
 				
 				update_MetaData = 1'b1;
 				new_LRU_bit = 1'b1;
@@ -283,6 +295,7 @@ module cache_controller(clk, rst_n, wr, addr, enable, memory_data_valid, MetaDat
 				next_LRU_line = 1'b0;
 				wen_LRU_line = 1'b0;
 				miss_detected = 1'b0;
+				wen_miss_addr = 1'b0;
 				
 				update_MetaData = 1'b0;
 				new_LRU_bit = 1'b0;
@@ -305,6 +318,7 @@ module cache_controller(clk, rst_n, wr, addr, enable, memory_data_valid, MetaDat
 				next_LRU_line = 1'b0;
 				wen_LRU_line = 1'b0;
 				miss_detected = 1'b1;
+				wen_miss_addr = 1'b0;
 				
 				update_MetaData = fsm_busy ? write_tag_array : 1'b0;
 				new_LRU_bit = 1'b0;
@@ -327,6 +341,7 @@ module cache_controller(clk, rst_n, wr, addr, enable, memory_data_valid, MetaDat
 				next_LRU_line = 1'b0;
 				wen_LRU_line = 1'b0;
 				miss_detected = 1'b1;
+				wen_miss_addr = 1'b0;
 				
 				update_MetaData = fsm_busy ? write_tag_array : 1'b0;
 				new_LRU_bit = 1'b0;
@@ -349,6 +364,7 @@ module cache_controller(clk, rst_n, wr, addr, enable, memory_data_valid, MetaDat
 				next_LRU_line = 1'b0;
 				wen_LRU_line = 1'b0;
 				miss_detected = 1'b1;
+				wen_miss_addr = 1'b0;
 				
 				update_MetaData = fsm_busy ? write_tag_array : 1'b0;
 				new_LRU_bit = 1'b0;
@@ -371,6 +387,7 @@ module cache_controller(clk, rst_n, wr, addr, enable, memory_data_valid, MetaDat
 				next_LRU_line = 1'b0;
 				wen_LRU_line = 1'b0;
 				miss_detected = 1'b1;
+				wen_miss_addr = 1'b0;
 				
 				update_MetaData = fsm_busy ? write_tag_array : 1'b0;
 				new_LRU_bit = 1'b0;
@@ -393,6 +410,7 @@ module cache_controller(clk, rst_n, wr, addr, enable, memory_data_valid, MetaDat
 				next_LRU_line = 1'b0;
 				wen_LRU_line = 1'b0;
 				miss_detected = 1'b1;
+				wen_miss_addr = 1'b0;
 				
 				update_MetaData = fsm_busy ? write_tag_array : 1'b0;
 				new_LRU_bit = 1'b0;
@@ -415,6 +433,7 @@ module cache_controller(clk, rst_n, wr, addr, enable, memory_data_valid, MetaDat
 				next_LRU_line = 1'b0;
 				wen_LRU_line = 1'b0;
 				miss_detected = 1'b1;
+				wen_miss_addr = 1'b0;
 				
 				update_MetaData = fsm_busy ? write_tag_array : 1'b0;
 				new_LRU_bit = 1'b0;
